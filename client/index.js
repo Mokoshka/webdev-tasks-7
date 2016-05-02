@@ -59,7 +59,7 @@ update('/status')
         }
     });
 
-setImg('./mokona.svg');
+setImg('./Mokona.svg');
 store.subscribe(render);
 setButtonsActions(store);
 
