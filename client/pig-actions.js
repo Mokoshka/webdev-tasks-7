@@ -86,10 +86,10 @@ const stopListen = (store, callback) => {
 
 export const death = (store) => {
     stopAction(state, store);
-    state = 'death';
     if (state !== 'death') {
         animateDeath();
     }
+    state = 'death';
 };
 
 export const happy = () => {

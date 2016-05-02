@@ -47,6 +47,10 @@ const play = (source) => {
     player.play();
 };
 
+export const deleteSounds = () => {
+    clearTimeout(soundsTimeout);
+};
+
 export const playDeath = () => {
     deleteSounds();
     player.src = sounds[4];
