@@ -1,7 +1,7 @@
 'use strict';
 
 require('./index.styl');
-require('./images/Mokona.svg');
+require('./images/mokona.svg');
 
 import React from 'react';
 import ReactDom from 'react-dom';
@@ -14,34 +14,38 @@ import Characteristics from './blocks/characteristics';
 import {updateStatus} from './actions';
 
 import {update} from './network/client-requests';
-import {setButtonsActions} from './buttons/buttons';
+import {setButtonsActions, changeValueOfBtn} from './buttons/buttons';
+import {setStorage, getStorage, setChangeListener} from './network/local-storage';
 import {setCookie, getCookie} from './network/cookies';
 import {setDecreaseMood, setIncreaseMood} from './mood_actions/mood';
-
-import {animate, sleep, wakeUp, listen, stopListen, death, happy, eat} from './animations/animate';
+import {setImg} from './animations/animate';
 
 import {setBattery} from './feature/battery';
 import {getRecognizer} from './feature/speach_recognition';
 import {setDeviceLight} from './feature/ambient_light';
 import {setPageVisibility} from './feature/page_visibility';
+import {setVolumeControl, setTimeoutForPlay, playDeath} from './feature/sounds';
+import {setNotification, sendNotification} from './feature/notification';
+
+import {live, sleep, listen, eat, death, happy} from './pig-actions';
 
 const store = createStore(hrunoApp);
 
 function render() {
     ReactDom.render(
         <Characteristics store={store} />,
-        document.querySelector('.wrapper')
+        document.querySelector('.menu__wrapper')
     );
 }
 
 
 update('/status')
     .then((status) => {
-        let cookieMood;
+        let clientMood;
         for (let name in status) {
-            cookieMood = getCookie(name);
-            if (status.hasOwnProperty(name) && cookieMood) {
-                status[name] = cookieMood;
+            clientMood = getStorage(name);
+            if (status.hasOwnProperty(name) && clientMood) {
+                status[name] = clientMood;
             }
         }
 
@@ -51,69 +55,121 @@ update('/status')
         let {characteristics} = store.getState();
         for (let mood in characteristics) {
             if (characteristics.hasOwnProperty(mood)) {
-                setDecreaseMood(mood, store, setCookie);
+                setDecreaseMood(mood, store, setStorage);
             }
         }
     });
 
+setImg('./mokona.svg');
 store.subscribe(render);
 setButtonsActions(store);
 
-setBattery(store);
-setDeviceLight();
+var recognizer = getRecognizer();
+if (recognizer) {
+    recognizer.onresult = event => {
+        let index = event.resultIndex;
+        let result = event.results[index][0].transcript.trim();
+        let log = document.querySelector('.phrases');
 
-setPageVisibility(() => {
-    setIncreaseMood('energy', store, setCookie);
-    sleep();
-}, () => {
-    setDecreaseMood('energy', store, setCookie);
-    wakeUp();
-});
+        log.innerHTML = result;
+        happy();
 
-getRecognizer().onresult = event => {
-    let index = event.resultIndex;
-    let result = event.results[index][0].transcript.trim();
-    let log = document.querySelector('.phrases');
+        let indicate = document.querySelector('.mood > .statusbar__indicate').innerText - 0 + 10;
+        if (indicate > 100) {
+            indicate = 100;
+        }
+        document.querySelector('.mood > .statusbar__indicate').innerText = `${indicate}`;
 
-    log.innerHTML = result;
+        if (indicate >= 100) {
+            recognizer.stop();
+        }
+    };
 
-    let indicate = document.querySelector('.mood > .statusbar__indicate').innerText - 0 + 10;
-    document.querySelector('.mood > .statusbar__indicate').innerText = `${indicate}`;
+    let detected = document.querySelector('.support__speech .support__detected');
+    detected.innerText = 'On';
+    detected.setAttribute('class', 'support__detected support__detected_on');
+}
 
-    if (indicate >= 100) {
-        stopListen();
+function eatAction(store) {
+    if (recognizer) {
         recognizer.stop();
     }
-};
+    document.querySelector('.phrases').style.border = '';
+    changeValueOfBtn('sleep', 'РЎРїР°С‚СЊ');
+    eat(store);
+}
 
+function sleepAction(store) {
+    if (recognizer) {
+        recognizer.stop();
+    }
+    document.querySelector('.phrases').style.border = '';
+    sleep(store);
+}
 
+var isHasBattery = setBattery(store, eatAction, live);
+if (isHasBattery) {
+    let detected = document.querySelector('.support__battery .support__detected');
+    detected.innerText = 'On';
+    detected.setAttribute('class', 'support__detected support__detected_on');
+}
 
+var isHasDeviceLight = setDeviceLight(store, live, sleepAction);
+if (isHasDeviceLight) {
+    let detected = document.querySelector('.support__light .support__detected');
+    detected.innerText = 'On';
+    detected.setAttribute('class', 'support__detected support__detected_on');
+}
 
+var isHasPageVisibility = setPageVisibility(store, sleepAction, live);
+if (isHasPageVisibility) {
+    let detected = document.querySelector('.support__visibility .support__detected');
+    detected.innerText = 'On';
+    detected.setAttribute('class', 'support__detected support__detected_on');
+}
 
+setVolumeControl(getCookie('volume'));
+setTimeoutForPlay();
 
+const ableToNotify = setNotification();
+if (ableToNotify) {
+    let detected = document.querySelector('.support__notification .support__detected');
+    detected.innerText = 'On';
+    detected.setAttribute('class', 'support__detected support__detected_on');
+}
 
-
-var SpeechRecognition = window.SpeechRecognition     ||
-    window.webkitSpeechRecognition;
-
-var recognizer = new SpeechRecognition();
-
-
-recognizer.lang = 'en-US';
-
-// продолжает слушать и расопзнавать речь даже после паузы
-recognizer.continuous = true;     // false по умолчанию
-
-// повзоляет получать промежуточные результаты
-recognizer.interimResults = true; // false по умолчанию
-
-
-
-
-
-let mokona = document.querySelector('#mokona');
-mokona.addEventListener('click', event => {
-    listen();
+let mokona = document.querySelector('.hrunogochi');
+mokona.addEventListener('click', () => {
+    changeValueOfBtn('sleep', 'РЎРїР°С‚СЊ');
+    listen(store);
+    document.querySelector('.phrases').style.border = 'solid 4px black';
 }, false);
 
+setChangeListener((event) => {
+    let {characteristics} = store.getState();
+    let counter = 0;
+    for (let name in characteristics) {
+        if (characteristics.hasOwnProperty(name)) {
+            if (characteristics[name] === 0) {
+                counter += 1;
+            }
+        }
+    }
 
+    if (event.value === 10 && ableToNotify && event.value - event.oldValue < 0) {
+        Notification.requestPermission(sendNotification(event.name));
+    }
+
+    if (event.value - event.oldValue > 0 && event.value === 100) {
+        live(store);
+        document.querySelector('.phrases').style.border = '';
+        changeValueOfBtn('sleep', 'РЎРїР°С‚СЊ');
+    }
+
+    if (counter > 1) {
+        document.querySelector('.phrases').style.border = '';
+        changeValueOfBtn('sleep', 'РЎРїР°С‚СЊ');
+        playDeath();
+        death(store);
+    }
+});

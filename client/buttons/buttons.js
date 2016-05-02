@@ -1,16 +1,26 @@
 'use strict';
 
-import {setCookie, deleteCookie} from '../network/cookies';
+import {setStorage, deleteStorage} from '../network/local-storage';
 import {update} from '../network/client-requests';
 
 import {setDecreaseMood, setIncreaseMood} from '../mood_actions/mood';
-import {sleep, wakeUp, listen} from '../animations/animate';
+import {sleep, wakeUp, listen, death, live, eat, reanimate, stopAction} from '../pig-actions';
 
 import {updateStatus} from '../actions';
+import {playDeath, setTimeoutForPlay} from '../feature/sounds';
+
+export const changeValueOfBtn = (nameBtn, value) => {
+    document.querySelector(`.menu__buttons__${nameBtn}`).setAttribute('value', value);
+};
 
 export const setButtonsActions = (store) => {
-    document.querySelector('.restart').addEventListener('click', () => {
-        deleteCookie();
+    document.querySelector('.menu__buttons__restart').addEventListener('click', () => {
+        let {characteristic} = store.getState();
+        for (let name in characteristic) {
+            if (characteristic.hasOwnProperty(name)) {
+                deleteStorage(name);
+            }
+        }
         update('/status')
             .then((status) => {
                 let action = updateStatus(status);
@@ -19,30 +29,42 @@ export const setButtonsActions = (store) => {
                 let {characteristics} = store.getState();
                 for (let mood in characteristics) {
                     if (characteristics.hasOwnProperty(mood)) {
-                        setDecreaseMood(mood, store, setCookie);
+                        setDecreaseMood(mood, store, setStorage);
                     }
                 }
-            })
+            });
+        setTimeoutForPlay();
+        reanimate(store);
     }, false);
 
-    document.querySelector('.feed').addEventListener('click', () => {
-        setIncreaseMood('fullness', store, setCookie);
+    document.querySelector('.menu__buttons__feed').addEventListener('click', () => {
+        changeValueOfBtn('sleep', 'Спать');
+        document.querySelector('.phrases').style.border = '';
+        eat(store);
     }, false);
 
-    var btnSleep = document.querySelector('.sleep');
+    var btnSleep = document.querySelector('.menu__buttons__sleep');
     btnSleep.addEventListener('click', () => {
         if (btnSleep.getAttribute('value') === 'Спать') {
-            setIncreaseMood('energy', store, setCookie);
-            sleep();
-            btnSleep.setAttribute('value', 'Разбудить');
+            document.querySelector('.phrases').style.border = '';
+            sleep(store);
+            changeValueOfBtn('sleep', 'Разбудить');
         } else {
-            setDecreaseMood('energy', store, setCookie);
-            wakeUp();
-            btnSleep.setAttribute('value', 'Спать');
+            document.querySelector('.phrases').style.border = '';
+            live(store);
+            changeValueOfBtn('sleep', 'Спать');
         }
     }, false);
 
-    document.querySelector('.speak').addEventListener('click', () => {
-        listen();
+    document.querySelector('.menu__buttons__speak').addEventListener('click', () => {
+        changeValueOfBtn('sleep', 'Спать');
+        listen(store);
+    }, false);
+
+    document.querySelector('.menu__buttons__death').addEventListener('click', () => {
+        changeValueOfBtn('sleep', 'Спать');
+        document.querySelector('.phrases').style.border = '';
+        playDeath();
+        death(store);
     }, false);
 };

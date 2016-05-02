@@ -20,7 +20,14 @@ export const setDecreaseMood = (mood, store, save, delay = 3000) => {
 };
 
 export const setIncreaseMood = (mood, store, save, delay = 1000) => {
-    clearInterval(intervals[mood]);
+    for (let interval in intervals) {
+        if (intervals.hasOwnProperty(interval)) {
+            clearInterval(intervals[interval]);
+            if (interval !== mood) {
+                setDecreaseMood(interval, store, save);
+            }
+        }
+    }
 
     intervals[mood] = setInterval(() => {
         let indicate = document.querySelector(`.${mood} > .statusbar__indicate`);

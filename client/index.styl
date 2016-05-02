@@ -1,25 +1,26 @@
 .statusbar {
-  background-color: green;
-  position: relative;
+  background-color: #4fc3f7;
+  border: solid 2px #0277bd;
 
-  max-width: 30%;
-  width: 500px;
+  width: 296px;
 
   &__name {
+    margin: 0.5rem 0 0 0;
     padding: 0;
-    margin: 0;
   }
 
   &__indicate {
     width: 100%;
+    font-size: 1.4rem;
+    text-align: center;
   }
 
   &__indicate_high {
-    background-color: #0f0;
+    background-color: #76ff03;
   }
 
   &__indicate_normal {
-    background-color: #b0ff00;
+    background-color: #c6ff00;
   }
 
   &__indicate_low {
@@ -27,24 +28,99 @@
   }
 
   &__indicate_critical {
-    background-color: red
+    background-color: #ff9100;
   }
 }
 
-.hrunogochi {
-  //background: url(./images/mokona.jpg) center no-repeat;
-  //background-size: contain;
-  margin-left: auto;
+body {
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+  padding: 1px;
+}
 
+.container {
   width: 100%;
-  height: 500px;
 }
 
-.restart,
-.feed,
-.sleep,
-.speak {
-  background-color: #ffc400;
-  color: #000080;
+.hrunogochi {
+  margin: 20vh auto 0;
+  width: 100%;
 }
 
+#mokona_svg {
+  width: 100%;
+  height: 350px;
+  overflow: visible;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  max-width: 300px;
+  background-color: #ffe082;
+  height: 99vh;
+
+  &__buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    &__restart,
+    &__feed,
+    &__sleep,
+    &__speak,
+    &__death {
+      background-color: #ffc400;
+      color: #000080;
+      min-width: 30%;
+      margin: 0.5rem 1%;
+    }
+  }
+}
+
+.support {
+  margin: 0;
+  list-style: none;
+
+  &__detected {
+    font-size: 1.2rem;
+  }
+
+  &__detected_off {
+    color: #f44336;
+  }
+
+  &__detected_on {
+    color: #7cb342;
+  }
+}
+
+.volume__control {
+  -webkit-appearance: none;
+}
+
+.volume__control::-webkit-slider-runnable-track {
+  height: 10px;
+  background-color: #616161;
+  border-radius: 20px;
+  border: solid 4px #212121;
+
+}
+
+.volume__control::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  border: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  margin-top: -8px;
+  background: #686868;
+}
+
+.phrases {
+  height: 2rem;
+  width: 60%;
+  margin: 2rem auto;
+}

@@ -14,11 +14,6 @@ export const getCookie = (name) => {
     return Cookie.get();
 };
 
-export const deleteCookie = () => {
-    let coockies = getCookie();
-    for (let name in coockies) {
-        if (coockies.hasOwnProperty(name)) {
-            Cookie.remove(name);
-        }
-    }
+export const deleteCookie = (name) => {
+    Cookie.remove(name);
 };

@@ -3,18 +3,19 @@
 import {setIncreaseMood, setDecreaseMood} from '../mood_actions/mood';
 import {setCookie} from '../network/cookies';
 
-export const setBattery = (store) => {
+export const setBattery = (store, chargeCb, dischargeCb) => {
     if (!navigator.getBattery) {
         return;
     }
 
     const initBattery = (battery) => {
         battery.onchargingchange = () => {
-            //console.log('change charging');
             if (battery.charging) {
-                setIncreaseMood('fullness', store, setCookie);
+                //setIncreaseMood('fullness', store, setCookie);
+                chargeCb(store);
             } else {
-                setDecreaseMood('fullness', store, setCookie);
+                //setDecreaseMood('fullness', store, setCookie);
+                dischargeCb(store);
             }
         };
         battery.onchargingchange();
@@ -23,4 +24,6 @@ export const setBattery = (store) => {
     navigator
         .getBattery()
         .then(initBattery);
+
+    return true;
 };

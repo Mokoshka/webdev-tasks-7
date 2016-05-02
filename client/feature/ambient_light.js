@@ -2,16 +2,18 @@
 
 import {sleep, wakeUp} from '../animations/animate';
 
-export const setDeviceLight = () => {
+export const setDeviceLight = (store, lightCb, darkCb) => {
     if (!('ondevicelight' in window)) {
         return;
     }
 
     window.ondevicelight = event => {
         if (event.value < 40) {
-            sleep();
+            darkCb(store);
         } else {
-            wakeUp();
+            lightCb(store);
         }
     };
+
+    return true;
 };

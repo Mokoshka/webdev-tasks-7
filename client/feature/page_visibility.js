@@ -1,6 +1,6 @@
 'use strict';
 
-export const setPageVisibility = (cbIfHidden, cbIfNotHidden) => {
+export const setPageVisibility = (store, cbIfHidden, cbIfNotHidden) => {
     var hidden = null;
     var visibilityState = null;
     var visibilityChange = null;
@@ -21,9 +21,11 @@ export const setPageVisibility = (cbIfHidden, cbIfNotHidden) => {
 
     document.addEventListener(visibilityChange, () => {
         if (document[hidden]) {
-            cbIfHidden();
+            cbIfHidden(store);
         } else {
-            cbIfNotHidden();
+            cbIfNotHidden(store);
         }
     });
+
+    return true;
 };
