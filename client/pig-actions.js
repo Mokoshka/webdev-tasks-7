@@ -35,13 +35,11 @@ export const live = (store) => {
 };
 
 export const reanimate = () => {
-    console.log('live');
     state = 'live';
     animateReanimate();
 };
 
 export const sleep = (store) => {
-    console.log('sleep');
     stopAction(state, store, animateSleep);
     if (state !== 'death') {
         state = 'sleep';
@@ -56,7 +54,6 @@ const wakeUp = (store, callback) => {
 };
 
 export const eat = (store) => {
-    console.log('eat');
     stopAction(state, store, animateEat);
     if (state !== 'death') {
         state = 'eat';
@@ -66,13 +63,11 @@ export const eat = (store) => {
 
 const stopEat = (store, callback) => {
     state = 'live';
-    console.log('stopEat');
     animateStopEat(callback);
     setDecreaseMood('fullness', store, setStorage);
 };
 
 export const listen = (store) => {
-    console.log('listen');
     stopAction(state, store, animateListen);
     if (state !== 'death') {
         state = 'listen';
@@ -84,7 +79,6 @@ export const listen = (store) => {
 
 const stopListen = (store, callback) => {
     state = 'live';
-    console.log('stopListen');
     animateStopListen(callback);
 
     setDecreaseMood('mood', store, setStorage);
@@ -93,7 +87,6 @@ const stopListen = (store, callback) => {
 export const death = (store) => {
     stopAction(state, store);
     state = 'death';
-    console.log('death');
     if (state !== 'death') {
         animateDeath();
     }

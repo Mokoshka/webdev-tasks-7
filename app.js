@@ -28,11 +28,11 @@ app.use(cookieParser());
 app.use((req, res, next) => {
     req.commonData = {
         meta: {
-            description: 'Свиногочи',
+            description: 'Хрюногочи',
             charset: 'utf-8'
         },
         page: {
-            title: 'Свиногочи'
+            title: 'Хрюногочи'
         },
         isDev: process.env.NODE_ENV === 'development'
     };
