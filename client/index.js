@@ -1,7 +1,7 @@
 'use strict';
 
 require('./index.styl');
-require('./images/mokona.svg');
+require('./images/Mokona.svg');
 
 import React from 'react';
 import ReactDom from 'react-dom';
@@ -37,7 +37,6 @@ function render() {
         document.querySelector('.menu__wrapper')
     );
 }
-
 
 update('/status')
     .then((status) => {
